@@ -1,0 +1,110 @@
+@page "/login"
+@using BlazorTest.Host.Components.Layout
+@layout LoginLayout
+@using BlazorTest.Model.Contracts.DTOs.Authentication
+@using BlazorTest.Model.Contracts.Services
+@inject IAuthenticationService AuthService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">Sign In</MudText>
+
+<EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+
+    <MudTextField @bind-Value="_loginRequest.Email"
+                  For="@(() => _loginRequest.Email)"
+                  Label="Email"
+                  Variant="Variant.Outlined"
+                  InputType="InputType.Email"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Email"
+                  Class="mb-4" />
+
+    <MudTextField @bind-Value="_loginRequest.Password"
+                  For="@(() => _loginRequest.Password)"
+                  Label="Password"
+                  Variant="Variant.Outlined"
+                  InputType="@_passwordInputType"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@_passwordIcon"
+                  OnAdornmentClick="TogglePasswordVisibility"
+                  Class="mb-4" />
+
+    <MudCheckBox @bind-Value="_loginRequest.RememberMe"
+                 Label="Remember me"
+                 Color="Color.Primary"
+                 Class="mb-4" />
+
+    <MudButton ButtonType="ButtonType.Submit"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               FullWidth="true"
+               Size="Size.Large"
+               Disabled="@_isLoading"
+               Class="mb-4">
+        @if (_isLoading)
+        {
+            <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+            <span>Signing in...</span>
+        }
+        else
+        {
+            <span>Sign In</span>
+        }
+    </MudButton>
+</EditForm>
+
+<MudDivider Class="my-4" />
+
+<MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+    <MudLink Href="/forgot-password" Color="Color.Primary">Forgot password?</MudLink>
+</MudText>
+
+@code {
+    private LoginRequest _loginRequest = new();
+    private bool _isLoading = false;
+    private bool _passwordVisible = false;
+    private InputType _passwordInputType = InputType.Password;
+    private string _passwordIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void TogglePasswordVisibility()
+    {
+        if (_passwordVisible)
+        {
+            _passwordVisible = false;
+            _passwordInputType = InputType.Password;
+            _passwordIcon = Icons.Material.Filled.VisibilityOff;
+        }
+        else
+        {
+            _passwordVisible = true;
+            _passwordInputType = InputType.Text;
+            _passwordIcon = Icons.Material.Filled.Visibility;
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        _isLoading = true;
+        try
+        {
+            var response = await AuthService.LoginAsync(_loginRequest);
+
+            // Store access token (in a real app, use a proper state management solution)
+            // For now, we'll just navigate to the dashboard
+
+            Snackbar.Add($"Welcome back, {response.User?.UserName}!", Severity.Success);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Login failed: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
+

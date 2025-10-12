@@ -1,0 +1,111 @@
+﻿@page "/counter"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<PageTitle>Counter - Synchronized</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Counter</MudText>
+<MudText Class="mb-4" Color="Color.Secondary">
+    This counter is synchronized in real-time across all open windows using SignalR
+</MudText>
+
+<MudPaper Class="pa-8" Elevation="2">
+    <div class="d-flex flex-column align-center">
+        <MudText Typo="Typo.h2" Color="Color.Primary" Class="mb-4">
+            @currentCount
+        </MudText>
+
+        <div class="d-flex gap-4">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       OnClick="IncrementCount"
+                       Disabled="@(!IsConnected)"
+                       StartIcon="@Icons.Material.Filled.Add">
+                Increment
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Size="Size.Large"
+                       OnClick="ResetCount"
+                       Disabled="@(!IsConnected)"
+                       StartIcon="@Icons.Material.Filled.Refresh">
+                Reset
+            </MudButton>
+        </div>
+
+        <MudChip T="string"
+                 Class="mt-4"
+                 Icon="@(IsConnected ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Error)"
+                 Color="@(IsConnected ? Color.Success : Color.Error)">
+            @(IsConnected ? "Connected" : "Disconnected")
+        </MudChip>
+    </div>
+</MudPaper>
+
+<MudAlert Severity="Severity.Info" Class="mt-4">
+    <strong>Try it:</strong> Open this page in multiple browser windows or tabs and click the buttons.
+    The counter will update simultaneously across all instances!
+</MudAlert>
+
+@code {
+    private HubConnection? hubConnection;
+    private int currentCount = 0;
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Create SignalR connection
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/hubs/counter"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        // Register handler for counter updates
+        hubConnection.On<int>("CounterUpdated", (count) =>
+        {
+            currentCount = count;
+            InvokeAsync(StateHasChanged);
+        });
+
+        // Start connection
+        try
+        {
+            await hubConnection.StartAsync();
+
+            // Get initial count
+            currentCount = await hubConnection.InvokeAsync<int>("GetCurrentCount");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error connecting to hub: {ex.Message}");
+        }
+    }
+
+    private async Task IncrementCount()
+    {
+        if (hubConnection is not null && IsConnected)
+        {
+            await hubConnection.InvokeAsync("IncrementCounter");
+        }
+    }
+
+    private async Task ResetCount()
+    {
+        if (hubConnection is not null && IsConnected)
+        {
+            await hubConnection.InvokeAsync("ResetCounter");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

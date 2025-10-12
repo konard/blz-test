@@ -1,0 +1,89 @@
+﻿@page "/"
+
+<PageTitle>Dashboard - BlazorTest</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
+<MudText Class="mb-8">Welcome to BlazorTest - Your Blazor Application Framework</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex justify-space-between">
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Total Users</MudText>
+                        <MudText Typo="Typo.h5">1</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex justify-space-between">
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Active Sessions</MudText>
+                        <MudText Typo="Typo.h5">1</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Insights" Color="Color.Success" Size="Size.Large" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex justify-space-between">
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">API Calls</MudText>
+                        <MudText Typo="Typo.h5">0</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.Api" Color="Color.Info" Size="Size.Large" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex justify-space-between">
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">System Status</MudText>
+                        <MudText Typo="Typo.h5">Online</MudText>
+                    </div>
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-8">
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Quick Actions</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <div class="d-flex flex-wrap gap-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Href="/admin/users">
+                        Add User
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Settings" Href="/admin/settings">
+                        Settings
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Login" Href="/login">
+                        Test Login
+                    </MudButton>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
