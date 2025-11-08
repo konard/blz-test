@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inherits LayoutComponentBase
 
 <MudLayout>
     <MudAppBar Elevation="1">

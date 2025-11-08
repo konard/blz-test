@@ -2,6 +2,8 @@ using BlazorTest.Host.Components;
 using BlazorTest.Host.Configuration;
 using BlazorTest.Host.Endpoints;
 using BlazorTest.Host.Infrastructure.Data.Migrations;
+using BlazorTest.Host.Services.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,12 @@ builder.Services.AddMudServices();
 
 // Add SignalR
 builder.Services.AddSignalR();
+
+// Add HttpContextAccessor (required for authentication)
+builder.Services.AddHttpContextAccessor();
+
+// Add custom authentication state provider
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
 // Add framework services (database, repositories, authentication, etc.)
 builder.Services.AddBlazorTestFramework(builder.Configuration);

@@ -1,4 +1,10 @@
-﻿<MudNavMenu>
+@using BlazorTest.Host.Services.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+
+<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
     <MudNavLink Href="/counter" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
 
@@ -9,5 +15,30 @@
         <MudNavLink Href="/admin/roles" Icon="@Icons.Material.Filled.Security">Roles</MudNavLink>
         <MudNavLink Href="/admin/settings" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
     </MudNavGroup>
+
+    <MudDivider Class="my-2" />
+
+    <MudNavLink OnClick="HandleLogout" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
 </MudNavMenu>
+
+@code {
+    private void HandleLogout()
+    {
+        // Remove the authentication cookie
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext != null)
+        {
+            httpContext.Response.Cookies.Delete(".BlazorTest.AccessToken");
+        }
+
+        // Notify the authentication state provider
+        if (AuthenticationStateProvider is CustomAuthenticationStateProvider customProvider)
+        {
+            customProvider.MarkUserAsLoggedOut();
+        }
+
+        // Redirect to login page
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+}
 

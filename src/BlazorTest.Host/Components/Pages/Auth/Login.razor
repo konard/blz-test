@@ -3,9 +3,13 @@
 @layout LoginLayout
 @using BlazorTest.Model.Contracts.DTOs.Authentication
 @using BlazorTest.Model.Contracts.Services
+@using BlazorTest.Host.Services.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthenticationService AuthService
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IHttpContextAccessor HttpContextAccessor
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">Sign In</MudText>
 
@@ -91,11 +95,31 @@
         {
             var response = await AuthService.LoginAsync(_loginRequest);
 
-            // Store access token (in a real app, use a proper state management solution)
-            // For now, we'll just navigate to the dashboard
+            // Store access token in secure HTTP-only cookie
+            var httpContext = HttpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Use HTTPS only
+                    SameSite = SameSiteMode.Strict,
+                    Expires = _loginRequest.RememberMe
+                        ? DateTimeOffset.UtcNow.AddDays(7)
+                        : (DateTimeOffset?)null // Session cookie if not "remember me"
+                };
+
+                httpContext.Response.Cookies.Append(".BlazorTest.AccessToken", response.AccessToken, cookieOptions);
+            }
+
+            // Notify the authentication state provider
+            if (AuthenticationStateProvider is CustomAuthenticationStateProvider customProvider)
+            {
+                customProvider.MarkUserAsAuthenticated(response.AccessToken);
+            }
 
             Snackbar.Add($"Welcome back, {response.User?.UserName}!", Severity.Success);
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/", forceLoad: true);
         }
         catch (Exception ex)
         {
